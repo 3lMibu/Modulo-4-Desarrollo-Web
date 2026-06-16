@@ -1,0 +1,5 @@
+node_modules/
+
+# Notas personales de prompts (no se suben al repo entregable)
+docs/02-bitacora-prompts.md
+docs/*bitacora-prompts*
