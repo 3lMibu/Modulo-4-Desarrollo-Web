@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeTag QR — Tu información de emergencia siempre contigo</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Estilos específicos de esta página (landing) -->
+    <style>
+        /* --- Hero: sección principal con fondo de color --- */
+        .hero {
+            background: linear-gradient(135deg, var(--color-primario) 0%, #2E75B6 100%);
+            color: white;
+            padding: 5rem 1.5rem;
+            text-align: center;
+        }
+
+        .hero-titulo {
+            font-size: 2.6rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-titulo span {
+            color: var(--color-alerta);  /* "QR" en ámbar */
+        }
+
+        .hero-subtitulo {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-botones {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* --- Sección de características / cómo funciona --- */
+        .seccion {
+            padding: 4rem 0;
+        }
+
+        .seccion-titulo {
+            text-align: center;
+            font-size: 1.8rem;
+            color: var(--color-primario);
+            margin-bottom: 0.5rem;
+        }
+
+        .seccion-subtitulo {
+            text-align: center;
+            color: var(--color-texto-suave);
+            margin-bottom: 3rem;
+        }
+
+        /* --- Grid de tarjetas de características --- */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card-feature {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-top: 4px solid var(--color-acento);
+        }
+
+        .card-feature .icono {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-feature h3 {
+            color: var(--color-primario);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .card-feature p {
+            color: var(--color-texto-suave);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* --- Sección de pasos (cómo funciona) --- */
+        .pasos {
+            display: flex;
+            gap: 1rem;
+            counter-reset: paso;
+            flex-wrap: wrap;
+        }
+
+        .paso {
+            flex: 1;
+            min-width: 180px;
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            padding: 1.5rem;
+            box-shadow: var(--sombra);
+            position: relative;
+            padding-top: 3rem;
+        }
+
+        /* Número del paso generado con CSS */
+        .paso::before {
+            counter-increment: paso;
+            content: counter(paso);
+            position: absolute;
+            top: -16px;
+            left: 1.5rem;
+            background: var(--color-alerta);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .paso h4 { color: var(--color-primario); margin-bottom: 0.5rem; }
+        .paso p  { color: var(--color-texto-suave); font-size: 0.9rem; }
+
+        /* --- Sección CTA (llamada a la acción final) --- */
+        .cta {
+            background: var(--color-primario);
+            color: white;
+            text-align: center;
+            padding: 4rem 1.5rem;
+        }
+
+        .cta h2 { font-size: 2rem; margin-bottom: 1rem; }
+        .cta p  { opacity: 0.85; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+        /* Disclaimer (aviso legal) */
+        .disclaimer {
+            background: #FFF8E7;
+            border-left: 4px solid var(--color-alerta);
+            padding: 1rem 1.25rem;
+            border-radius: 0 var(--radio-borde) var(--radio-borde) 0;
+            font-size: 0.88rem;
+            color: #7c5000;
+            margin: 2rem 0 0;
+        }
+
+        /* Responsive: en celular las tarjetas se apilan */
+        @media (max-width: 768px) {
+            .grid-3 { grid-template-columns: 1fr; }
+            .hero-titulo { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =====================================================
+         BARRA DE NAVEGACIÓN
+         Los id "nav-registro", "nav-login", etc. son usados
+         por app.js para mostrar/ocultar según haya sesión.
+    ====================================================== -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-logo">
+            Safe<span>Tag QR</span>
+        </a>
+        <ul class="navbar-links">
+            <li><a href="como-funciona.html">¿Cómo funciona?</a></li>
+            <li><a href="registro.html"  id="nav-registro">Registrarse</a></li>
+            <li><a href="login.html"     id="nav-login">Iniciar sesión</a></li>
+            <li><a href="panel.html"     id="nav-panel"  style="display:none">Mi panel</a></li>
+            <li><a href="#"              id="nav-salir"  style="display:none">Cerrar sesión</a></li>
+        </ul>
+    </nav>
+
+    <!-- =====================================================
+         HERO — Primera impresión del sitio
+    ====================================================== -->
+    <section class="hero">
+        <h1 class="hero-titulo">
+            Tu información de emergencia,<br>
+            siempre en tu muñeca con <span>SafeTag QR</span>
+        </h1>
+        <p class="hero-subtitulo">
+            Regístrate, genera tu código QR y llévalo en una pulsera o llavero.
+            En caso de emergencia, cualquier persona puede escanearlo y contactar
+            a tu familia o conocer tus datos médicos en segundos.
+        </p>
+        <div class="hero-botones">
+            <a href="registro.html" class="btn btn-alerta btn-grande">
+                Crear mi perfil gratis
+            </a>
+            <a href="como-funciona.html" class="btn btn-outline btn-grande" style="color:white; border-color:white;">
+                Ver cómo funciona
+            </a>
+        </div>
+    </section>
+
+    <main>
+        <div class="contenedor">
+
+            <!-- =================================================
+                 CARACTERÍSTICAS PRINCIPALES
+            ================================================== -->
+            <section class="seccion">
+                <h2 class="seccion-titulo">¿Por qué SafeTag QR?</h2>
+                <p class="seccion-subtitulo">Una solución simple que puede marcar la diferencia en un momento crítico</p>
+
+                <div class="grid-3">
+                    <div class="card-feature">
+                        <div class="icono">🚨</div>
+                        <h3>Respuesta inmediata</h3>
+                        <p>En segundos, cualquier persona puede ver tu tipo de sangre, alergias y contactos de emergencia, sin necesidad de tener cuenta.</p>
+                    </div>
+                    <div class="card-feature">
+                        <div class="icono">🔒</div>
+                        <h3>Acceso seguro por QR</h3>
+                        <p>Tu información solo es accesible a través de tu código QR único. No aparece en buscadores ni puede accederse sin escanearlo.</p>
+                    </div>
+                    <div class="card-feature">
+                        <div class="icono">📋</div>
+                        <h3>Tu información completa</h3>
+                        <p>Nombre, dirección, tipo de sangre, alergias, medicamentos y múltiples contactos de emergencia, todo en un solo escaneo.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 CÓMO FUNCIONA — Pasos resumidos
+            ================================================== -->
+            <section class="seccion" style="padding-top:0">
+                <h2 class="seccion-titulo">¿Cómo funciona?</h2>
+                <p class="seccion-subtitulo">En 4 pasos simples</p>
+
+                <div class="pasos">
+                    <div class="paso">
+                        <h4>Regístrate</h4>
+                        <p>Crea tu cuenta con tus datos personales, información médica y contactos de emergencia.</p>
+                    </div>
+                    <div class="paso">
+                        <h4>Obtén tu QR</h4>
+                        <p>El sistema genera automáticamente tu código QR único y personal.</p>
+                    </div>
+                    <div class="paso">
+                        <h4>Llévalo contigo</h4>
+                        <p>Imprime el QR y ponlo en una pulsera, llavero, mochila o cartera.</p>
+                    </div>
+                    <div class="paso">
+                        <h4>Protección activa</h4>
+                        <p>En una emergencia, quien te ayude escanea el QR y puede contactar a tu familia de inmediato.</p>
+                    </div>
+                </div>
+
+                <!-- Aviso legal / Disclaimer -->
+                <div class="disclaimer">
+                    <strong>Aviso importante:</strong> SafeTag QR es una herramienta de asistencia en emergencias.
+                    No reemplaza servicios médicos profesionales ni garantiza atención médica.
+                    El usuario es responsable de mantener su información actualizada y de autorizar
+                    la visibilidad de sus datos al registrarse en la plataforma.
+                    Los datos se almacenan localmente en su dispositivo bajo su propio consentimiento.
+                </div>
+            </section>
+
+        </div><!-- /contenedor -->
+    </main>
+
+    <!-- =====================================================
+         LLAMADA A LA ACCIÓN FINAL
+    ====================================================== -->
+    <section class="cta">
+        <h2>Empieza hoy, es gratis</h2>
+        <p>Tu registro toma menos de 3 minutos. Tu código QR estará listo de inmediato.</p>
+        <a href="registro.html" class="btn btn-alerta btn-grande">Crear mi perfil ahora</a>
+    </section>
+
+    <!-- =====================================================
+         PIE DE PÁGINA
+    ====================================================== -->
+    <footer>
+        <p>SafeTag QR &copy; 2026 — Proyecto académico | Módulo 4 Desarrollo Web — UNAB</p>
+        <p style="margin-top:0.3rem">
+            Reyes · Linares · Villalobos · Sibrián
+        </p>
+    </footer>
+
+    <!-- Scripts: primero app.js (funciones compartidas), luego los específicos -->
+    <script src="js/app.js"></script>
+    <script>
+        // Al cargar la página, actualiza el navbar según si hay sesión activa o no
+        actualizarNavbar();
+    </script>
+
+</body>
+</html>
