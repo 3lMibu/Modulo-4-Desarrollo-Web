@@ -3,3 +3,9 @@ node_modules/
 # Notas personales de prompts (no se suben al repo entregable)
 docs/02-bitacora-prompts.md
 docs/*bitacora-prompts*
+
+# Documentos descriptivos locales (guías y borradores de definición)
+docs/GUIA-DESARROLLO.md
+docs/01-definicion-proyecto.md
+docs/01-definicion-proyecto.docx
+docs/generar-docx.js
