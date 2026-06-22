@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historias reales — SafeTag QR</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        /* --- Encabezado emocional --- */
+        .page-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, var(--color-primario) 100%);
+            color: white;
+            padding: 4rem 1.5rem;
+            text-align: center;
+        }
+
+        .page-header .etiqueta {
+            display: inline-block;
+            background: var(--color-alerta);
+            color: white;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.3rem 1rem;
+            border-radius: 99px;
+            margin-bottom: 1.2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .page-header p {
+            opacity: 0.85;
+            max-width: 580px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* --- Animación principal (iframe 16:9) --- */
+        .animacion-contenedor {
+            background: #faf9f5;
+            border-radius: var(--radio-borde);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+            margin: 2.5rem 0;
+            position: relative;
+            padding-top: 56.25%;   /* relación 16:9 responsiva */
+        }
+
+        .animacion-contenedor iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
+        /* --- Tarjetas de las 3 historias --- */
+        .historias-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .historia-card {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            overflow: hidden;
+        }
+
+        .historia-card-header {
+            padding: 1.5rem 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .historia-emoji {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+
+        .historia-titulo {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-bottom: 0.2rem;
+        }
+
+        .historia-subtitulo {
+            font-size: 0.82rem;
+            color: var(--color-texto-suave);
+        }
+
+        /* Barra de progreso emocional: caos → control → calma */
+        .progreso-emocional {
+            display: flex;
+            margin: 0 1.5rem 1.25rem;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 6px;
+        }
+
+        .progreso-caos    { background: var(--color-peligro);    flex: 1; }
+        .progreso-control { background: var(--color-alerta);     flex: 1; }
+        .progreso-calma   { background: var(--color-acento);     flex: 1; }
+
+        .historia-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .historia-labels span {
+            font-size: 0.72rem;
+            color: var(--color-texto-suave);
+            font-weight: 600;
+        }
+
+        .historia-body {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .historia-body p {
+            font-size: 0.9rem;
+            color: var(--color-texto-suave);
+            line-height: 1.7;
+        }
+
+        /* Momento clave de cada historia */
+        .momento-clave {
+            background: var(--color-fondo);
+            border-left: 3px solid var(--color-acento);
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--color-texto);
+            font-style: italic;
+        }
+
+        /* --- Frase central / impacto --- */
+        .frase-impacto {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--color-primario);
+            border-radius: var(--radio-borde);
+            color: white;
+            margin: 2rem 0;
+        }
+
+        .frase-impacto blockquote {
+            font-size: 1.5rem;
+            line-height: 1.5;
+            font-weight: 300;
+            max-width: 680px;
+            margin: 0 auto 1rem;
+        }
+
+        .frase-impacto blockquote strong {
+            color: var(--color-alerta);
+            font-weight: 700;
+        }
+
+        .frase-impacto cite {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* --- CTA final --- */
+        .cta-final {
+            text-align: center;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, var(--color-acento) 0%, var(--color-primario) 100%);
+            border-radius: var(--radio-borde);
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .cta-final h2 { font-size: 1.7rem; margin-bottom: 0.75rem; }
+        .cta-final p  { opacity: 0.9; margin-bottom: 1.5rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+        @media (max-width: 768px) {
+            .historias-grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 1.7rem; }
+            .frase-impacto blockquote { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-logo">Safe<span>Tag QR</span></a>
+        <ul class="navbar-links">
+            <li><a href="como-funciona.html">¿Cómo funciona?</a></li>
+            <li><a href="historias.html" style="color:white; font-weight:700;">Historias</a></li>
+            <li><a href="registro.html"  id="nav-registro">Registrarse</a></li>
+            <li><a href="login.html"     id="nav-login">Iniciar sesión</a></li>
+            <li><a href="panel.html"     id="nav-panel"  style="display:none">Mi panel</a></li>
+            <li><a href="#"              id="nav-salir"  style="display:none">Cerrar sesión</a></li>
+        </ul>
+    </nav>
+
+    <!-- ENCABEZADO -->
+    <div class="page-header">
+        <span class="etiqueta">Casos de uso reales</span>
+        <h1>Cuando más lo necesitas,<br>SafeTag QR responde</h1>
+        <p>Estas son situaciones que ocurren todos los días. En cada una, la diferencia entre el caos y la calma fue un simple escaneo.</p>
+    </div>
+
+    <main>
+        <div class="contenedor">
+
+            <!-- ANIMACIÓN NARRATIVA -->
+            <div class="animacion-contenedor">
+                <iframe
+                    src="animacion-historias.html"
+                    title="Historias reales SafeTag QR"
+                    loading="lazy"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- LAS 3 HISTORIAS -->
+            <div class="historias-grid">
+
+                <!-- Historia 1 -->
+                <div class="historia-card">
+                    <div class="historia-card-header">
+                        <span class="historia-emoji">👴</span>
+                        <div>
+                            <div class="historia-titulo">El anciano extraviado</div>
+                            <div class="historia-subtitulo">Parque central, 3:00 pm</div>
+                        </div>
+                    </div>
+                    <div class="progreso-emocional">
+                        <div class="progreso-caos"></div>
+                        <div class="progreso-control"></div>
+                        <div class="progreso-calma"></div>
+                    </div>
+                    <div class="historia-labels">
+                        <span>Caos</span>
+                        <span>Escaneo</span>
+                        <span>Calma</span>
+                    </div>
+                    <div class="historia-body">
+                        <p>Don Roberto, 78 años, se alejó de su casa y no recuerda cómo regresar. No puede decir su dirección ni el teléfono de su familia. Un policía lo encuentra sentado en una banca, confundido.</p>
+                        <div class="momento-clave">
+                            El policía nota una pulsera en su muñeca. Escanea el QR. En segundos: nombre, dirección y el número de su hijo Carlos. La llamada dura 30 segundos. La familia llega en 10 minutos.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historia 2 -->
+                <div class="historia-card">
+                    <div class="historia-card-header">
+                        <span class="historia-emoji">🏍️</span>
+                        <div>
+                            <div class="historia-titulo">El accidente de tránsito</div>
+                            <div class="historia-subtitulo">Carretera, 7:30 am</div>
+                        </div>
+                    </div>
+                    <div class="progreso-emocional">
+                        <div class="progreso-caos"></div>
+                        <div class="progreso-control"></div>
+                        <div class="progreso-calma"></div>
+                    </div>
+                    <div class="historia-labels">
+                        <span>Caos</span>
+                        <span>Escaneo</span>
+                        <span>Calma</span>
+                    </div>
+                    <div class="historia-body">
+                        <p>Marco, motociclista, queda inconsciente tras un accidente. Los paramédicos no saben su tipo de sangre ni si toma algún medicamento que pueda complicar la atención. Cada segundo cuenta.</p>
+                        <div class="momento-clave">
+                            Un paramédico ve un llavero con QR en el casco. Lo escanea: tipo de sangre O+, alérgico a la penicilina, toma anticoagulantes. La atención correcta se aplica de inmediato.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historia 3 -->
+                <div class="historia-card">
+                    <div class="historia-card-header">
+                        <span class="historia-emoji">👧</span>
+                        <div>
+                            <div class="historia-titulo">El niño extraviado</div>
+                            <div class="historia-subtitulo">Centro comercial, sábado</div>
+                        </div>
+                    </div>
+                    <div class="progreso-emocional">
+                        <div class="progreso-caos"></div>
+                        <div class="progreso-control"></div>
+                        <div class="progreso-calma"></div>
+                    </div>
+                    <div class="historia-labels">
+                        <span>Caos</span>
+                        <span>Escaneo</span>
+                        <span>Calma</span>
+                    </div>
+                    <div class="historia-body">
+                        <p>Sofía, 6 años, se separa de su mamá en el supermercado. Llora, no recuerda el número de su mamá ni el nombre completo de ella. El guardia de seguridad no sabe por dónde empezar.</p>
+                        <div class="momento-clave">
+                            El guardia nota un llavero en la mochila de Sofía con un QR. Lo escanea: nombre de la niña, foto de la mamá y dos números de contacto. El reencuentro ocurre en 4 minutos.
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /historias-grid -->
+
+            <!-- FRASE DE IMPACTO -->
+            <div class="frase-impacto">
+                <blockquote>
+                    "En una emergencia, los primeros segundos son críticos.<br>
+                    SafeTag QR convierte la <strong>desesperación</strong> de no saber qué hacer<br>
+                    en la <strong>certeza</strong> de saber exactamente cómo ayudar."
+                </blockquote>
+                <cite>— SafeTag QR, sistema de asistencia en emergencias</cite>
+            </div>
+
+            <!-- CTA FINAL -->
+            <div class="cta-final">
+                <h2>Que tu familia nunca quede sin respuesta</h2>
+                <p>Regístrate hoy. Tu código QR estará listo en menos de 3 minutos y puede marcar la diferencia en el momento que más importa.</p>
+                <a href="registro.html" class="btn btn-alerta btn-grande">Protegerme ahora</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>SafeTag QR &copy; 2026 — Proyecto académico | Módulo 4 Desarrollo Web — UNAB</p>
+        <p style="margin-top:0.3rem">Reyes · Linares · Villalobos · Sibrián</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>actualizarNavbar();</script>
+
+</body>
+</html>
