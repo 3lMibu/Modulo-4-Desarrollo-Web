@@ -1,4 +1,7 @@
 node_modules/
+package.json
+package-lock.json
+.claude/
 
 # Notas personales de prompts (no se suben al repo entregable)
 docs/02-bitacora-prompts.md

@@ -163,6 +163,14 @@ function limpiarErrorCampo(idCampo) {
    Llama esta función en todas las páginas que tengan navbar.
    ---------------------------------------------------------- */
 function actualizarNavbar() {
+    /* Efecto: navbar se compacta cuando el usuario baja del hero */
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        window.addEventListener('scroll', function () {
+            navbar.classList.toggle('navbar-compacta', window.scrollY > 60);
+        }, { passive: true });
+    }
+
     const sesion = obtenerSesion();
     const enlaceRegistro = document.getElementById('nav-registro');
     const enlaceLogin    = document.getElementById('nav-login');

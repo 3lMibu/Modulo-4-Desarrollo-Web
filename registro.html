@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta — SafeTag QR</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- qrcode.js: librería que genera el código QR visualmente en el navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, var(--color-primario) 0%, #2E75B6 100%);
+            color: white;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+        }
+        .page-header h1 { font-size: 1.9rem; margin-bottom: 0.4rem; }
+        .page-header p  { opacity: 0.85; font-size: 1rem; }
+
+        /* --- Indicador de secciones --- */
+        .secciones-indicador {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin: 2rem 0 0.5rem;
+        }
+
+        .seccion-indicador-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-texto-suave);
+        }
+
+        .seccion-indicador-item .num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--color-borde);
+            color: var(--color-texto-suave);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .seccion-indicador-item.activo .num {
+            background: var(--color-primario);
+            color: white;
+        }
+
+        .seccion-separador {
+            width: 40px;
+            height: 2px;
+            background: var(--color-borde);
+            align-self: center;
+            margin: 0 0.25rem;
+            transition: background 0.3s ease;
+        }
+
+        .seccion-separador.completo { background: var(--color-primario); }
+
+        .seccion-indicador-item { transition: color 0.3s ease; }
+        .seccion-indicador-item .num { transition: background 0.3s ease, color 0.3s ease; }
+        .seccion-indicador-item.activo { color: var(--color-primario); }
+
+        /* --- Tarjeta del formulario --- */
+        .form-card {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-card-titulo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--color-fondo);
+        }
+
+        .form-card-titulo .icono {
+            width: 40px;
+            height: 40px;
+            background: var(--color-primario);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .form-card-titulo h2 {
+            font-size: 1.1rem;
+            color: var(--color-primario);
+            margin-bottom: 0.1rem;
+        }
+
+        .form-card-titulo p {
+            font-size: 0.82rem;
+            color: var(--color-texto-suave);
+        }
+
+        /* Grilla de 2 columnas dentro del formulario */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1.25rem;
+        }
+
+        /* --- Bloque de contacto dinámico --- */
+        .contacto-bloque {
+            background: var(--color-fondo);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1.5px solid var(--color-borde);
+            position: relative;
+        }
+
+        .contacto-bloque-titulo {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-eliminar-contacto {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--color-peligro);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .btn-eliminar-contacto:hover { background: #FEE2E2; }
+
+        /* --- Disclaimer / consentimiento --- */
+        .disclaimer-bloque {
+            background: #FFF8E7;
+            border: 1.5px solid #F4A261;
+            border-radius: var(--radio-borde);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .disclaimer-bloque h3 {
+            color: #7c5000;
+            font-size: 0.92rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .disclaimer-bloque p {
+            color: #7c5000;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-fila {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .checkbox-fila input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checkbox-fila span {
+            font-size: 0.88rem;
+            color: #7c5000;
+            font-weight: 600;
+        }
+
+        /* --- Pantalla de éxito (se muestra después del registro) --- */
+        .pantalla-exito {
+            display: none;   /* oculta hasta que el registro sea exitoso */
+            text-align: center;
+            padding: 2.5rem 2rem;
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+        }
+
+        .pantalla-exito .icono-exito {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pantalla-exito h2 {
+            color: var(--color-acento);
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pantalla-exito p {
+            color: var(--color-texto-suave);
+            margin-bottom: 1.5rem;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Contenedor del QR generado */
+        #qr-codigo {
+            display: inline-block;
+            padding: 1rem;
+            background: white;
+            border: 2px solid var(--color-acento);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .exito-acciones {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid-2 { grid-template-columns: 1fr; }
+            .secciones-indicador { gap: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-logo">Safe<span>Tag QR</span></a>
+        <ul class="navbar-links">
+            <li><a href="como-funciona.html">¿Cómo funciona?</a></li>
+            <li><a href="registro.html" id="nav-registro" style="color:white; font-weight:700;">Registrarse</a></li>
+            <li><a href="login.html"    id="nav-login">Iniciar sesión</a></li>
+            <li><a href="panel.html"    id="nav-panel"  style="display:none">Mi panel</a></li>
+            <li><a href="#"             id="nav-salir"  style="display:none">Cerrar sesión</a></li>
+        </ul>
+    </nav>
+
+    <!-- ENCABEZADO -->
+    <div class="page-header">
+        <h1>Crea tu perfil SafeTag QR</h1>
+        <p>Tu información de emergencia, protegida y siempre disponible</p>
+    </div>
+
+    <main>
+        <div class="contenedor" style="max-width:720px;">
+
+            <!-- Indicador de secciones (actualizado por JS al hacer scroll) -->
+            <div class="secciones-indicador">
+                <div class="seccion-indicador-item activo" id="ind-1" data-seccion="1">
+                    <div class="num">1</div>
+                    <span>Datos personales</span>
+                </div>
+                <div class="seccion-separador" id="sep-1-2"></div>
+                <div class="seccion-indicador-item" id="ind-2" data-seccion="2">
+                    <div class="num">2</div>
+                    <span>Perfil médico</span>
+                </div>
+                <div class="seccion-separador" id="sep-2-3"></div>
+                <div class="seccion-indicador-item" id="ind-3" data-seccion="3">
+                    <div class="num">3</div>
+                    <span>Contactos</span>
+                </div>
+            </div>
+
+            <!-- Alerta global (para errores del formulario) -->
+            <div id="alerta-registro" class="alerta alerta-error mt-2"></div>
+
+            <!-- ================================================
+                 FORMULARIO DE REGISTRO
+            ================================================= -->
+            <form id="form-registro" novalidate>
+
+                <!-- SECCIÓN 1: Datos personales -->
+                <div class="form-card" id="form-seccion-1">
+                    <div class="form-card-titulo">
+                        <div class="icono">👤</div>
+                        <div>
+                            <h2>Datos personales</h2>
+                            <p>Esta información aparecerá al escanear tu QR</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-grupo">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" placeholder="Ej: Juan" required>
+                            <span class="form-error" id="error-nombre"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <label for="apellido">Apellido *</label>
+                            <input type="text" id="apellido" placeholder="Ej: Pérez" required>
+                            <span class="form-error" id="error-apellido"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-grupo">
+                            <label for="telefono">Teléfono *</label>
+                            <input type="tel" id="telefono" placeholder="Ej: 7890-1234" required>
+                            <span class="form-error" id="error-telefono"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <label for="fecha-nacimiento">Fecha de nacimiento</label>
+                            <input type="date" id="fecha-nacimiento">
+                        </div>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" placeholder="Ej: Col. San Benito, calle 3, casa 12, San Salvador">
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-grupo">
+                            <label for="correo">Correo electrónico *</label>
+                            <input type="email" id="correo" placeholder="tucorreo@email.com" required>
+                            <span class="form-error" id="error-correo"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <!-- campo vacío intencional para alinear la grid -->
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-grupo">
+                            <label for="password">Contraseña *</label>
+                            <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
+                            <span class="form-error" id="error-password"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <label for="password-confirmar">Confirmar contraseña *</label>
+                            <input type="password" id="password-confirmar" placeholder="Repite la contraseña" required>
+                            <span class="form-error" id="error-password-confirmar"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Perfil médico -->
+                <div class="form-card" id="form-seccion-2">
+                    <div class="form-card-titulo">
+                        <div class="icono">🏥</div>
+                        <div>
+                            <h2>Perfil médico</h2>
+                            <p>Información crítica para atención de emergencia</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-grupo">
+                            <label for="tipo-sangre">Tipo de sangre *</label>
+                            <select id="tipo-sangre" required>
+                                <option value="">— Selecciona —</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="Desconocido">No lo sé</option>
+                            </select>
+                            <span class="form-error" id="error-tipo-sangre"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <!-- espacio para balance visual -->
+                        </div>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="alergias">Alergias conocidas</label>
+                        <input type="text" id="alergias" placeholder="Ej: Penicilina, látex, mariscos (separadas por coma)">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="enfermedades">Enfermedades o condiciones preexistentes</label>
+                        <input type="text" id="enfermedades" placeholder="Ej: Diabetes tipo 2, hipertensión">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="medicamentos">Medicamentos actuales</label>
+                        <input type="text" id="medicamentos" placeholder="Ej: Metformina 500mg, Losartán 50mg">
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: Contactos de emergencia -->
+                <div class="form-card" id="form-seccion-3">
+                    <div class="form-card-titulo">
+                        <div class="icono">📞</div>
+                        <div>
+                            <h2>Contactos de emergencia</h2>
+                            <p>Agrega al menos un contacto. Máximo 3.</p>
+                        </div>
+                    </div>
+
+                    <!-- Los contactos se generan dinámicamente con JavaScript -->
+                    <div id="contactos-contenedor"></div>
+
+                    <button type="button" id="btn-agregar-contacto" class="btn btn-outline mt-2">
+                        + Agregar otro contacto
+                    </button>
+                    <span class="form-error" id="error-contactos" style="display:block; margin-top:0.5rem;"></span>
+                </div>
+
+                <!-- DISCLAIMER / CONSENTIMIENTO -->
+                <div class="disclaimer-bloque">
+                    <h3>⚠️ Aviso de privacidad y consentimiento</h3>
+                    <p>
+                        Al registrarte, aceptas que tu información (nombre, datos médicos y contactos de emergencia)
+                        será accesible para cualquier persona que escanee el código QR de tu pulsera.
+                        Esta plataforma es una herramienta de asistencia en emergencias y no reemplaza servicios
+                        médicos profesionales. Eres responsable de mantener tu información actualizada.
+                        Los datos se almacenan localmente en tu dispositivo.
+                    </p>
+                    <label class="checkbox-fila">
+                        <input type="checkbox" id="acepto-terminos">
+                        <span>Entiendo y acepto que mi información de emergencia sea visible al escanear mi QR</span>
+                    </label>
+                    <span class="form-error" id="error-terminos" style="margin-top:0.5rem;"></span>
+                </div>
+
+                <!-- BOTÓN SUBMIT -->
+                <button type="submit" class="btn btn-primario btn-grande btn-bloque" id="btn-registrar">
+                    Crear mi perfil y obtener mi QR
+                </button>
+
+            </form>
+
+            <!-- ================================================
+                 PANTALLA DE ÉXITO (oculta hasta completar registro)
+            ================================================= -->
+            <div class="pantalla-exito" id="pantalla-exito">
+                <div class="icono-exito">🎉</div>
+                <h2>¡Tu perfil está listo!</h2>
+                <p>
+                    Tu código QR ha sido generado. Imprímelo o guárdalo y colócalo en
+                    tu pulsera, llavero o donde prefieras. En una emergencia, este código
+                    puede marcar la diferencia.
+                </p>
+
+                <!-- El QR se dibuja aquí por JavaScript -->
+                <div id="qr-codigo"></div>
+
+                <p style="font-size:0.85rem; color:var(--color-texto-suave); margin-bottom:1.5rem;">
+                    Guarda este QR. También puedes verlo en cualquier momento desde tu panel.
+                </p>
+
+                <div class="exito-acciones">
+                    <button onclick="imprimirQR()" class="btn btn-outline">
+                        🖨️ Imprimir QR
+                    </button>
+                    <a href="panel.html" class="btn btn-primario">
+                        Ir a mi panel →
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>SafeTag QR &copy; 2026 — Proyecto académico | Módulo 4 Desarrollo Web — UNAB</p>
+        <p style="margin-top:0.3rem">Reyes · Linares · Villalobos · Sibrián</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/registro.js"></script>
+    <script>actualizarNavbar();</script>
+
+</body>
+</html>

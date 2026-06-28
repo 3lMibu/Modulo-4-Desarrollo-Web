@@ -155,10 +155,96 @@
             margin: 2rem 0 0;
         }
 
+        /* --- Sección de historias reales (inline, compacta) --- */
+        .seccion-historias {
+            background: linear-gradient(180deg, var(--color-fondo) 0%, #eef4fb 100%);
+            padding: 4rem 0;
+            margin: 0 -1.5rem;   /* sangra hasta los bordes del viewport */
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .historias-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 2.5rem;
+        }
+
+        .historia-mini {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            padding: 1.5rem;
+            border-top: 3px solid var(--color-acento);
+        }
+
+        .historia-mini-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .historia-mini-emoji { font-size: 1.8rem; line-height: 1; }
+
+        .historia-mini-titulo {
+            font-weight: 700;
+            color: var(--color-primario);
+            font-size: 0.95rem;
+        }
+
+        .historia-mini-lugar {
+            font-size: 0.78rem;
+            color: var(--color-texto-suave);
+        }
+
+        .historia-mini-texto {
+            font-size: 0.88rem;
+            color: var(--color-texto-suave);
+            line-height: 1.6;
+            margin-bottom: 0.85rem;
+        }
+
+        .historia-mini-resultado {
+            background: #f0fdf4;
+            border-left: 3px solid var(--color-acento);
+            border-radius: 0 6px 6px 0;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.83rem;
+            color: #065F46;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .historias-ver-mas {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* --- Animación principal (iframe 16:9 responsivo) --- */
+        .animacion-contenedor {
+            background: #faf9f5;
+            border-radius: var(--radio-borde);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+            margin: 2.5rem 0 0;
+            position: relative;
+            padding-top: 56.25%;  /* relación 16:9 */
+        }
+
+        .animacion-contenedor iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
         /* Responsive: en celular las tarjetas se apilan */
         @media (max-width: 768px) {
-            .grid-3 { grid-template-columns: 1fr; }
-            .hero-titulo { font-size: 1.8rem; }
+            .grid-3              { grid-template-columns: 1fr; }
+            .historias-mini-grid { grid-template-columns: 1fr; }
+            .hero-titulo         { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -175,7 +261,6 @@
         </a>
         <ul class="navbar-links">
             <li><a href="como-funciona.html">¿Cómo funciona?</a></li>
-            <li><a href="historias.html">Historias</a></li>
             <li><a href="registro.html"  id="nav-registro">Registrarse</a></li>
             <li><a href="login.html"     id="nav-login">Iniciar sesión</a></li>
             <li><a href="panel.html"     id="nav-panel"  style="display:none">Mi panel</a></li>
@@ -208,6 +293,19 @@
 
     <main>
         <div class="contenedor">
+
+            <!-- =================================================
+                 ANIMACIÓN PRINCIPAL — Historias reales,
+                 visible inmediatamente al bajar del hero.
+            ================================================== -->
+            <div class="animacion-contenedor">
+                <iframe
+                    src="animacion-historias.html"
+                    title="Situaciones reales — SafeTag QR"
+                    loading="eager"
+                    allowfullscreen>
+                </iframe>
+            </div>
 
             <!-- =================================================
                  CARACTERÍSTICAS PRINCIPALES
@@ -273,6 +371,60 @@
 
         </div><!-- /contenedor -->
     </main>
+
+    <!-- =====================================================
+         HISTORIAS REALES — Prueba emocional antes del CTA
+    ====================================================== -->
+    <section class="seccion-historias">
+        <div class="contenedor">
+            <h2 class="seccion-titulo">Situaciones reales, ayuda real</h2>
+            <p class="seccion-subtitulo">Cada día ocurren emergencias donde la información correcta marca la diferencia</p>
+
+            <div class="historias-mini-grid">
+
+                <div class="historia-mini">
+                    <div class="historia-mini-header">
+                        <span class="historia-mini-emoji">👴</span>
+                        <div>
+                            <div class="historia-mini-titulo">El anciano extraviado</div>
+                            <div class="historia-mini-lugar">Parque central, 3:00 pm</div>
+                        </div>
+                    </div>
+                    <p class="historia-mini-texto">Don Roberto, 78 años, se alejó de su casa. No recuerda su dirección ni el teléfono de su familia. Un policía lo encuentra confundido en una banca.</p>
+                    <div class="historia-mini-resultado">El policía escanea la pulsera. En segundos tiene el número de su hijo. La familia llega en 10 minutos.</div>
+                </div>
+
+                <div class="historia-mini">
+                    <div class="historia-mini-header">
+                        <span class="historia-mini-emoji">🏍️</span>
+                        <div>
+                            <div class="historia-mini-titulo">El accidente de tránsito</div>
+                            <div class="historia-mini-lugar">Carretera, 7:30 am</div>
+                        </div>
+                    </div>
+                    <p class="historia-mini-texto">Marco queda inconsciente tras un accidente. Los paramédicos no saben su tipo de sangre ni si toma medicamentos que puedan complicar la atención.</p>
+                    <div class="historia-mini-resultado">Escanean el llavero de su casco: tipo O+, alérgico a penicilina, toma anticoagulantes. Atención correcta de inmediato.</div>
+                </div>
+
+                <div class="historia-mini">
+                    <div class="historia-mini-header">
+                        <span class="historia-mini-emoji">👧</span>
+                        <div>
+                            <div class="historia-mini-titulo">El niño extraviado</div>
+                            <div class="historia-mini-lugar">Centro comercial, sábado</div>
+                        </div>
+                    </div>
+                    <p class="historia-mini-texto">Sofía, 6 años, se separa de su mamá. Llora y no recuerda el número de contacto. El guardia de seguridad no sabe por dónde empezar.</p>
+                    <div class="historia-mini-resultado">Escanea el llavero de su mochila: nombre, foto de la mamá y dos números. Reencuentro en 4 minutos.</div>
+                </div>
+
+            </div>
+
+            <div class="historias-ver-mas">
+                <a href="historias.html" class="btn btn-outline">Ver las historias completas →</a>
+            </div>
+        </div>
+    </section>
 
     <!-- =====================================================
          LLAMADA A LA ACCIÓN FINAL

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de emergencia — SafeTag QR</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        /* -------------------------------------------------------
+           Esta página está optimizada para celular: quien escanea
+           el QR lo hace desde su teléfono en una situación urgente.
+           Prioridad: legible, rápido, sin distracciones.
+        ------------------------------------------------------- */
+
+        body { background: var(--color-fondo); }
+
+        /* Barra superior mínima */
+        .perfil-header {
+            background: var(--color-primario);
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .perfil-header-logo {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        .perfil-header-logo span { color: var(--color-alerta); }
+
+        .perfil-header-badge {
+            background: var(--color-peligro);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.8rem;
+            border-radius: 99px;
+        }
+
+        /* Contenedor estrecho para móvil pero cómodo en escritorio */
+        .perfil-contenedor {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+        }
+
+        /* ---- Tarjeta de identidad (nombre + tipo de sangre) ---- */
+        .tarjeta-identidad {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .sangre-circulo {
+            background: var(--color-peligro);
+            color: white;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 800;
+        }
+
+        .sangre-tipo {
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+
+        .sangre-label {
+            font-size: 0.62rem;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .identidad-datos { flex: 1; min-width: 0; }
+
+        .identidad-nombre {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .identidad-edad {
+            color: var(--color-texto-suave);
+            font-size: 0.9rem;
+        }
+
+        /* ---- Tarjetas de secciones ---- */
+        .seccion-tarjeta {
+            background: var(--color-superficie);
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .seccion-titulo {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-texto-suave);
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-borde);
+        }
+
+        /* ---- Filas de datos médicos ---- */
+        .dato-fila {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--color-fondo);
+        }
+
+        .dato-fila:last-child { border-bottom: none; }
+
+        .dato-icono {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+
+        .dato-contenido { flex: 1; }
+
+        .dato-etiqueta {
+            font-size: 0.78rem;
+            color: var(--color-texto-suave);
+            font-weight: 600;
+            margin-bottom: 0.1rem;
+        }
+
+        .dato-valor {
+            font-size: 0.95rem;
+            color: var(--color-texto);
+            line-height: 1.4;
+        }
+
+        .dato-valor.sin-dato {
+            color: var(--color-texto-suave);
+            font-style: italic;
+        }
+
+        /* Alergia con alerta visual */
+        .dato-valor.con-alerta {
+            color: var(--color-peligro);
+            font-weight: 600;
+        }
+
+        /* ---- Tarjetas de contacto ---- */
+        .contacto-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--color-fondo);
+        }
+
+        .contacto-card:last-child { border-bottom: none; }
+
+        .contacto-avatar {
+            background: var(--color-fondo);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .contacto-info { flex: 1; min-width: 0; }
+
+        .contacto-nombre {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--color-texto);
+        }
+
+        .contacto-parentesco {
+            font-size: 0.8rem;
+            color: var(--color-texto-suave);
+        }
+
+        /* Botón de llamada — grande para dedos en emergencia */
+        .btn-llamar {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--color-acento);
+            color: white;
+            padding: 0.55rem 1rem;
+            border-radius: var(--radio-borde);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .btn-llamar:hover { opacity: 0.85; }
+
+        /* ---- Dirección (sección secundaria) ---- */
+        .seccion-secundaria {
+            background: var(--color-fondo);
+            border: 1px solid var(--color-borde);
+            border-radius: var(--radio-borde);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .seccion-secundaria .seccion-titulo {
+            border-bottom-color: var(--color-borde);
+        }
+
+        /* ---- Pantalla de error ---- */
+        #pantalla-error {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .error-icono { font-size: 4rem; margin-bottom: 1rem; }
+
+        .error-titulo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-msg {
+            color: var(--color-texto-suave);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* ---- Tooltip informativo ---- */
+        .tooltip-contenedor {
+            display: inline-block;
+            position: relative;
+        }
+
+        .tooltip-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-texto-suave);
+            font-size: 0.8rem;
+            padding: 0 0 0 0.3rem;
+            line-height: 1;
+            vertical-align: middle;
+            transition: color 0.15s;
+        }
+
+        .tooltip-btn:hover { color: var(--color-primario); }
+
+        .tooltip-caja {
+            display: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: calc(100% + 8px);
+            background: var(--color-primario);
+            color: white;
+            font-size: 0.78rem;
+            font-weight: 400;
+            font-style: normal;
+            padding: 0.55rem 0.85rem;
+            border-radius: 6px;
+            width: 230px;
+            line-height: 1.5;
+            z-index: 200;
+        }
+
+        /* Flecha apuntando hacia abajo */
+        .tooltip-caja::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--color-primario);
+        }
+
+        /* ---- Aviso de pie de perfil ---- */
+        .aviso-pie {
+            background: #FFF8E7;
+            border-left: 3px solid var(--color-alerta);
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #7c5000;
+            margin-bottom: 1rem;
+        }
+
+        /* ---- Responsive: en celular reducir padding ---- */
+        @media (max-width: 480px) {
+            .perfil-contenedor { padding: 1rem 0.75rem 2rem; }
+            .tarjeta-identidad { gap: 1rem; padding: 1.25rem; }
+            .identidad-nombre  { font-size: 1.15rem; }
+            .sangre-circulo    { width: 60px; height: 60px; }
+            .sangre-tipo       { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO MÍNIMO (no navbar completo — quien llega aquí viene del QR) -->
+    <div class="perfil-header">
+        <a href="index.html" class="perfil-header-logo">Safe<span>Tag QR</span></a>
+        <span class="perfil-header-badge">🚨 Emergencia</span>
+    </div>
+
+    <div class="perfil-contenedor">
+
+        <!-- =====================================================
+             PANTALLA DE ERROR (visible si el UUID no existe)
+        ====================================================== -->
+        <div id="pantalla-error" style="display:none">
+            <div class="error-icono">🔍</div>
+            <div class="error-titulo">Perfil no encontrado</div>
+            <p class="error-msg">
+                Este código QR no está asociado a ningún perfil registrado en este dispositivo,
+                o el registro fue creado en otro navegador.
+            </p>
+            <a href="index.html" class="btn btn-primario">Ir al inicio</a>
+        </div>
+
+        <!-- =====================================================
+             PERFIL (visible cuando el UUID existe)
+        ====================================================== -->
+        <div id="pantalla-perfil" style="display:none">
+
+            <!-- IDENTIDAD + TIPO DE SANGRE -->
+            <div class="tarjeta-identidad">
+                <div class="sangre-circulo">
+                    <span class="sangre-tipo" id="p-sangre">—</span>
+                    <span class="sangre-label">sangre</span>
+                </div>
+                <div class="identidad-datos">
+                    <div class="identidad-nombre" id="p-nombre">—</div>
+                    <div class="identidad-edad"   id="p-edad">—</div>
+                    <!-- Anclaje para el tooltip del tipo de sangre (generado por JS) -->
+                    <div id="p-sangre-hint" style="margin-top:0.3rem"></div>
+                </div>
+            </div>
+
+            <!-- INFORMACIÓN MÉDICA -->
+            <div class="seccion-tarjeta">
+                <div class="seccion-titulo">Información médica</div>
+
+                <div class="dato-fila">
+                    <span class="dato-icono">⚠️</span>
+                    <div class="dato-contenido">
+                        <div class="dato-etiqueta" id="label-alergias">Alergias</div>
+                        <div class="dato-valor" id="p-alergias">—</div>
+                    </div>
+                </div>
+
+                <div class="dato-fila">
+                    <span class="dato-icono">🩺</span>
+                    <div class="dato-contenido">
+                        <div class="dato-etiqueta">Enfermedades o condiciones</div>
+                        <div class="dato-valor" id="p-enfermedades">—</div>
+                    </div>
+                </div>
+
+                <div class="dato-fila">
+                    <span class="dato-icono">💊</span>
+                    <div class="dato-contenido">
+                        <div class="dato-etiqueta">Medicamentos actuales</div>
+                        <div class="dato-valor" id="p-medicamentos">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACTOS DE EMERGENCIA -->
+            <div class="seccion-tarjeta">
+                <div class="seccion-titulo">Contactos de emergencia</div>
+                <div id="p-contactos">
+                    <!-- Se genera dinámicamente desde JS -->
+                </div>
+            </div>
+
+            <!-- DIRECCIÓN (sección discreta / secundaria) -->
+            <div class="seccion-secundaria" id="bloque-direccion" style="display:none">
+                <div class="seccion-titulo">Dirección</div>
+                <div class="dato-valor" id="p-direccion">—</div>
+            </div>
+
+            <!-- AVISO DE PIE -->
+            <div class="aviso-pie">
+                <strong>Aviso:</strong> Esta información fue registrada voluntariamente por su titular
+                para ser visible en caso de emergencia. SafeTag QR es un proyecto académico — no llama
+                a servicios de emergencia. En una emergencia llama al <strong>911</strong>.
+            </div>
+
+        </div><!-- /pantalla-perfil -->
+
+    </div><!-- /perfil-contenedor -->
+
+    <footer>
+        <p>SafeTag QR &copy; 2026 — Proyecto académico | Módulo 4 Desarrollo Web — UNAB</p>
+        <p style="margin-top:0.3rem">Reyes · Linares · Villalobos · Sibrián</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/perfil.js"></script>
+
+</body>
+</html>
