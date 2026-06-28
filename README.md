@@ -59,6 +59,8 @@ No se requiere instalación ni servidor. Solo:
 
 El sitio se abre directamente en el navegador. No necesita servidor local ni npm. La única dependencia externa es `qrcode.js`, que se carga desde CDN solo al momento de generar el QR (requiere conexión a internet en ese paso).
 
+> **Limitación del prototipo actual:** El código QR generado solo funciona si se escanea desde la misma computadora donde se hizo el registro. Esto se debe a que el proyecto se abre con el protocolo `file://` y los datos están en el `localStorage` de ese navegador específico. En la siguiente fase del proyecto, al incorporar backend y hosting web, el QR funcionará desde cualquier dispositivo.
+
 ---
 
 ## Estructura de archivos
