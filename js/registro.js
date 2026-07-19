@@ -208,13 +208,6 @@ function validarFormulario() {
     } else if (!esCorreoValido(correo)) {
         mostrarErrorCampo('correo', 'Ingresa un correo electrónico válido.');
         valido = false;
-    } else {
-        // Verificar si el correo ya está registrado
-        const existente = buscarUsuarioPorCorreo(correo);
-        if (existente) {
-            mostrarErrorCampo('correo', 'Este correo ya tiene una cuenta. ¿Deseas iniciar sesión?');
-            valido = false;
-        }
     }
 
     const pass = document.getElementById('password').value;
@@ -258,11 +251,10 @@ function validarFormulario() {
 
 // ----------------------------------------------------------------
 // procesarRegistro()
-// Función principal: valida → genera token → guarda → muestra QR
+// Función principal: valida → llama API → muestra QR
 // ----------------------------------------------------------------
-function procesarRegistro() {
+async function procesarRegistro() {
     if (!validarFormulario()) {
-        // Hacer scroll al primer error visible
         const primerError = document.querySelector('.form-error:not(:empty), .form-error[style*="block"]');
         if (primerError) {
             primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -270,10 +262,11 @@ function procesarRegistro() {
         return;
     }
 
-    // 1. Leer todos los datos del formulario
+    const btnSubmit = document.querySelector('#form-registro button[type="submit"]');
+    if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Guardando...'; }
+
     const nombre      = document.getElementById('nombre').value.trim();
     const apellido    = document.getElementById('apellido').value.trim();
-    const telefono    = document.getElementById('telefono').value.trim();
     const fechaNac    = document.getElementById('fecha-nacimiento').value;
     const direccion   = document.getElementById('direccion').value.trim();
     const correo      = document.getElementById('correo').value.trim().toLowerCase();
@@ -284,49 +277,52 @@ function procesarRegistro() {
     const medicamentos= document.getElementById('medicamentos').value.trim();
     const contactos   = recogerContactos();
 
-    // 2. Generar token UUID único — este es el "secreto" del QR
-    const token = generarToken();
+    try {
+        const resp = await fetch(window.location.origin + '/api/registro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                correo,
+                password,
+                nombre: nombre + ' ' + apellido,
+                perfil: {
+                    nombre,
+                    apellido,
+                    fecha_nacimiento : fechaNac || null,
+                    tipo_portador    : 'persona',
+                    tipo_sangre      : tipoSangre,
+                    alergias,
+                    enfermedades,
+                    medicamentos,
+                    direccion
+                },
+                contactos
+            })
+        });
 
-    // 3. Guardar perfil público (todo lo que aparecerá al escanear el QR)
-    const perfil = {
-        token,
-        nombre,
-        apellido,
-        telefono,
-        fechaNacimiento : fechaNac,
-        direccion,
-        correo,
-        tipoSangre,
-        alergias,
-        enfermedades,
-        medicamentos,
-        contactos,
-        fechaRegistro: new Date().toISOString()
-    };
-    guardarPerfil(token, perfil);
+        const data = await resp.json();
 
-    // 4. Guardar usuario en la lista de cuentas (para login futuro)
-    const usuarios = obtenerUsuarios();
-    usuarios.push({
-        id       : token,
-        correo   : correo,
-        nombre   : nombre + ' ' + apellido,
-        password : password     // nota: en producción real esto sería un hash
-    });
-    guardarUsuarios(usuarios);
+        if (!resp.ok) {
+            mostrarAlerta('alerta-registro', data.error || 'No se pudo completar el registro.');
+            return;
+        }
 
-    // 5. Iniciar sesión automáticamente tras el registro
-    iniciarSesion(token);
+        // Guardar sesión y mostrar pantalla de éxito con el token real de la BD
+        sessionStorage.setItem('usuario', JSON.stringify({ id: data.id, nombre: nombre + ' ' + apellido, correo }));
+        mostrarPantallaExito(data.token);
 
-    // 6. Generar QR y mostrar pantalla de éxito
-    mostrarPantallaExito(token);
+    } catch (err) {
+        mostrarAlerta('alerta-registro', 'No se pudo conectar con el servidor. Verifica que el backend esté en línea (puerto 3001).');
+    } finally {
+        if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.textContent = 'Crear cuenta'; }
+    }
 }
 
 // ----------------------------------------------------------------
 // mostrarPantallaExito(token)
 // Oculta el formulario, muestra la pantalla de éxito con el QR.
 // ----------------------------------------------------------------
-function mostrarPantallaExito(token) {
+async function mostrarPantallaExito(token) {
     // Ocultar formulario y disclaimer
     document.getElementById('form-registro').style.display = 'none';
     document.getElementById('alerta-registro').style.display = 'none';
@@ -337,8 +333,14 @@ function mostrarPantallaExito(token) {
 
     // URL que codificará el QR — quien la abra en el celular verá el perfil.
     // Se usa href (no origin) para que funcione tanto en file:// como en http://
-    const base = window.location.href.replace(/registro\.html.*$/, '');
-    const urlPerfil = base + 'perfil.html?id=' + token;
+    // Obtener IP de red del servidor para que el QR sea accesible desde cualquier dispositivo
+    let baseUrl = window.location.origin;
+    try {
+        const r = await fetch(window.location.origin + '/api/server-url');
+        const d = await r.json();
+        if (d.url) baseUrl = d.url;
+    } catch (_) { /* si falla, usa localhost */ }
+    const urlPerfil = baseUrl + '/perfil.html?token=' + token;
 
     // Generar el código QR visualmente usando qrcode.js
     new QRCode(document.getElementById('qr-codigo'), {

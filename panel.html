@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi panel — SafeTag QR</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, var(--color-primario) 0%, #2E75B6 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .page-header h1 { font-size: 1.6rem; margin: 0; }
+        .page-header p  { opacity: 0.85; font-size: 0.95rem; margin: 0.2rem 0 0; }
+        .btn-salir {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 1.5px solid rgba(255,255,255,0.5);
+            border-radius: 8px;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-salir:hover { background: rgba(255,255,255,0.35); }
+
+        .panel-container { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+
+        .seccion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--color-primario, #1F4E78);
+            padding-bottom: 0.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .seccion-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-primario, #1F4E78);
+        }
+        .btn-nueva-pulsera {
+            background: var(--color-primario, #1F4E78);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-nueva-pulsera:hover { background: #2E75B6; }
+
+        /* Tarjetas */
+        .pulseras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.2rem;
+        }
+        .pulsera-card {
+            background: var(--color-superficie, #fff);
+            border: 1px solid var(--color-borde, #e0e0e0);
+            border-radius: 12px;
+            padding: 1.4rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .pulsera-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .pulsera-nombre { font-size: 1.05rem; font-weight: 700; }
+        .pulsera-tipo   { font-size: 0.78rem; color: var(--color-texto-suave, #666); text-transform: capitalize; }
+        .badge { font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .badge-activa   { background: #d1fae5; color: #065f46; }
+        .badge-inactiva { background: #fee2e2; color: #991b1b; }
+        .pulsera-sangre { font-size: 0.85rem; color: var(--color-texto-suave, #555); }
+        .pulsera-sangre strong { color: var(--color-primario, #1F4E78); }
+        .qr-box { display: flex; justify-content: center; }
+        .qr-box div { border: 1px solid var(--color-borde, #ddd); border-radius: 8px; padding: 6px; }
+        .btn-ver-perfil {
+            display: block; text-align: center; padding: 0.55rem;
+            background: var(--color-primario, #1F4E78); color: #fff;
+            border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+            text-decoration: none; transition: background 0.2s;
+        }
+        .btn-ver-perfil:hover { background: #2E75B6; }
+
+        /* Estado vacío / carga */
+        .estado-vacio { text-align: center; padding: 3rem 1rem; color: var(--color-texto-suave, #777); }
+        .estado-vacio .icono { font-size: 3rem; margin-bottom: 0.8rem; }
+        .estado-vacio p { margin: 0.3rem 0; }
+        .spinner { display: flex; justify-content: center; padding: 3rem; }
+        .spinner::after {
+            content: ''; width: 36px; height: 36px;
+            border: 4px solid var(--color-borde, #ddd);
+            border-top-color: var(--color-primario, #1F4E78);
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--color-superficie, #fff);
+            border-radius: 14px;
+            width: 100%; max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.8rem;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+        }
+        .modal-titulo { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--color-primario, #1F4E78); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.6rem 0.85rem;
+            border: 1.5px solid var(--color-borde, #ccc);
+            border-radius: 8px; font-size: 0.95rem;
+            box-sizing: border-box; transition: border-color 0.2s;
+            background: var(--color-superficie, #fff);
+            color: var(--color-texto, #333);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--color-primario, #1F4E78);
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .modal-seccion {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; color: var(--color-primario, #1F4E78);
+            margin: 1.2rem 0 0.6rem; border-bottom: 1px solid var(--color-borde, #eee);
+            padding-bottom: 0.3rem;
+        }
+        .modal-footer { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 1.4rem; }
+        .btn-cancelar {
+            padding: 0.6rem 1.2rem; border: 1.5px solid var(--color-borde, #ccc);
+            border-radius: 8px; background: none; font-size: 0.9rem;
+            cursor: pointer; color: var(--color-texto, #333);
+        }
+        .btn-guardar {
+            padding: 0.6rem 1.4rem; background: var(--color-primario, #1F4E78);
+            color: #fff; border: none; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-guardar:hover { background: #2E75B6; }
+        .btn-guardar:disabled { opacity: 0.6; cursor: not-allowed; }
+        .modal-error {
+            background: #fdecea; border: 1px solid #f5c6cb; color: #842029;
+            border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.88rem;
+            margin-bottom: 0.8rem; display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-contenido">
+            <a href="index.html" class="navbar-logo">
+                <span class="logo-icono">🏷️</span>
+                <span class="logo-texto">SafeTag QR</span>
+            </a>
+            <ul class="navbar-links">
+                <li><a href="index.html">Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div>
+            <h1>Mi panel</h1>
+            <p id="bienvenida">Cargando...</p>
+        </div>
+        <button class="btn-salir" id="btn-salir">Cerrar sesión</button>
+    </header>
+
+    <div class="panel-container">
+        <div class="seccion-header">
+            <span class="seccion-titulo">Mis pulseras registradas</span>
+            <button class="btn-nueva-pulsera" id="btn-abrir-modal">+ Nueva pulsera</button>
+        </div>
+
+        <div id="estado-carga" class="spinner"></div>
+        <div id="lista-pulseras" class="pulseras-grid" style="display:none"></div>
+        <div id="estado-vacio" class="estado-vacio" style="display:none">
+            <div class="icono">📦</div>
+            <p><strong>No tienes pulseras registradas.</strong></p>
+            <p>Usa el botón <em>+ Nueva pulsera</em> para agregar una.</p>
+        </div>
+    </div>
+
+    <!-- ── Modal nueva pulsera ── -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-titulo">Nueva pulsera</div>
+            <div class="modal-error" id="modal-error"></div>
+
+            <p class="modal-seccion">¿Para quién es la pulsera?</p>
+            <div class="form-group">
+                <label for="m-tipo">Tipo de portador</label>
+                <select id="m-tipo">
+                    <option value="persona">Persona adulta</option>
+                    <option value="niño">Niño / Menor</option>
+                    <option value="adulto mayor">Adulto mayor</option>
+                    <option value="mascota">Mascota</option>
+                    <option value="objeto">Objeto (maleta, llave, etc.)</option>
+                </select>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="m-nombre">Nombre *</label>
+                    <input type="text" id="m-nombre" placeholder="Ej: Carlos">
+                </div>
+                <div class="form-group">
+                    <label for="m-apellido">Apellido</label>
+                    <input type="text" id="m-apellido" placeholder="Ej: López">
+                </div>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="m-fecha">Fecha de nacimiento</label>
+                    <input type="date" id="m-fecha">
+                </div>
+                <div class="form-group">
+                    <label for="m-sangre">Tipo de sangre</label>
+                    <select id="m-sangre">
+                        <option value="">Desconocido</option>
+                        <option>A+</option><option>A-</option>
+                        <option>B+</option><option>B-</option>
+                        <option>AB+</option><option>AB-</option>
+                        <option>O+</option><option>O-</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="modal-seccion">Información médica</p>
+            <div class="form-group">
+                <label for="m-alergias">Alergias</label>
+                <textarea id="m-alergias" placeholder="Ej: Penicilina, mariscos"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="m-enfermedades">Enfermedades o condiciones</label>
+                <textarea id="m-enfermedades" placeholder="Ej: Diabetes tipo 2"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="m-medicamentos">Medicamentos actuales</label>
+                <textarea id="m-medicamentos" placeholder="Ej: Metformina 500mg"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="m-direccion">Dirección</label>
+                <input type="text" id="m-direccion" placeholder="Ej: Col. Centro, calle 5">
+            </div>
+
+            <p class="modal-seccion">Contacto de emergencia</p>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="m-c-nombre">Nombre *</label>
+                    <input type="text" id="m-c-nombre" placeholder="Ej: María García">
+                </div>
+                <div class="form-group">
+                    <label for="m-c-parentesco">Parentesco</label>
+                    <input type="text" id="m-c-parentesco" placeholder="Ej: Mamá, dueño">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="m-c-telefono">Teléfono *</label>
+                <input type="tel" id="m-c-telefono" placeholder="Ej: 7890-1234">
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+                <button class="btn-guardar" id="btn-guardar">Guardar pulsera</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin + '/api';
+
+        // Verificar sesión
+        const usuarioStr = sessionStorage.getItem('usuario');
+        if (!usuarioStr) { window.location.href = 'login.html'; }
+        const usuario = JSON.parse(usuarioStr);
+
+        document.getElementById('bienvenida').textContent = `Hola, ${usuario.nombre}`;
+        document.getElementById('btn-salir').addEventListener('click', () => {
+            sessionStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        });
+
+        // BASE_URL para QRs accesibles desde la red
+        let BASE_URL = window.location.origin;
+        fetch(`${API}/server-url`).then(r => r.json()).then(d => { if (d.url) BASE_URL = d.url; }).catch(() => {});
+
+        // ── Cargar pulseras ──
+        async function cargarPulseras() {
+            const carga = document.getElementById('estado-carga');
+            const lista = document.getElementById('lista-pulseras');
+            const vacio = document.getElementById('estado-vacio');
+
+            carga.style.display = 'flex';
+            lista.style.display = 'none';
+            lista.innerHTML = '';
+            vacio.style.display = 'none';
+
+            try {
+                const resp = await fetch(`${API}/mis-pulseras?usuario_id=${usuario.id}`);
+                const data = await resp.json();
+                carga.style.display = 'none';
+
+                if (!resp.ok || !data.pulseras || data.pulseras.length === 0) {
+                    vacio.style.display = 'block';
+                    return;
+                }
+
+                lista.style.display = 'grid';
+                data.pulseras.forEach(p => lista.appendChild(crearTarjeta(p)));
+            } catch (err) {
+                carga.style.display = 'none';
+                vacio.innerHTML = `<div class="icono">⚠️</div>
+                    <p><strong>No se pudo conectar con el servidor.</strong></p>
+                    <p>Verifica que el backend esté corriendo.</p>`;
+                vacio.style.display = 'block';
+            }
+        }
+
+        function crearTarjeta(p) {
+            const card = document.createElement('div');
+            card.className = 'pulsera-card';
+
+            const badge = p.estado === 'activa'
+                ? `<span class="badge badge-activa">activa</span>`
+                : `<span class="badge badge-inactiva">${p.estado}</span>`;
+
+            const nombrePerfil = p.nombre ? `${p.nombre} ${p.apellido || ''}`.trim() : 'Sin perfil';
+            const sangre = p.tipo_sangre ? `<strong>${p.tipo_sangre}</strong>` : '—';
+            const urlPublica = `${BASE_URL}/perfil.html?token=${p.token}`;
+
+            card.innerHTML = `
+                <div class="pulsera-card-top">
+                    <div>
+                        <div class="pulsera-nombre">${nombrePerfil}</div>
+                        <div class="pulsera-tipo">${p.tipo_portador || ''}</div>
+                    </div>
+                    ${badge}
+                </div>
+                <div class="pulsera-sangre">Tipo de sangre: ${sangre}</div>
+                <div class="qr-box" id="qr-${p.id}"></div>
+                <a href="perfil.html?token=${p.token}" class="btn-ver-perfil" target="_blank">Ver perfil público</a>
+            `;
+
+            setTimeout(() => {
+                const el = document.getElementById(`qr-${p.id}`);
+                if (el) new QRCode(el, { text: urlPublica, width: 120, height: 120, colorDark: '#1F4E78', colorLight: '#ffffff' });
+            }, 0);
+
+            return card;
+        }
+
+        // ── Modal ──
+        const overlay  = document.getElementById('modal-overlay');
+        const errEl    = document.getElementById('modal-error');
+
+        document.getElementById('m-tipo').addEventListener('change', function () {
+            const sinApellido = ['mascota', 'objeto'];
+            const grupo = document.getElementById('m-apellido').closest('.form-group');
+            grupo.style.display = sinApellido.includes(this.value) ? 'none' : '';
+            if (sinApellido.includes(this.value)) document.getElementById('m-apellido').value = '';
+        });
+
+        document.getElementById('btn-abrir-modal').addEventListener('click', () => {
+            limpiarModal();
+            // Resetear visibilidad del apellido al abrir
+            document.getElementById('m-apellido').closest('.form-group').style.display = '';
+            overlay.classList.add('open');
+        });
+        document.getElementById('btn-cancelar').addEventListener('click', () => overlay.classList.remove('open'));
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+        function limpiarModal() {
+            ['m-nombre','m-apellido','m-fecha','m-direccion',
+             'm-alergias','m-enfermedades','m-medicamentos',
+             'm-c-nombre','m-c-parentesco','m-c-telefono'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('m-tipo').value = 'persona';
+            document.getElementById('m-sangre').value = '';
+            errEl.style.display = 'none';
+        }
+
+        document.getElementById('btn-guardar').addEventListener('click', async () => {
+            const nombre    = document.getElementById('m-nombre').value.trim();
+            const cNombre   = document.getElementById('m-c-nombre').value.trim();
+            const cTelefono = document.getElementById('m-c-telefono').value.trim();
+
+            if (!nombre) { mostrarError('El nombre del portador es obligatorio.'); return; }
+            if (!cNombre || !cTelefono) { mostrarError('El contacto de emergencia (nombre y teléfono) es obligatorio.'); return; }
+
+            const btn = document.getElementById('btn-guardar');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+            errEl.style.display = 'none';
+
+            try {
+                const resp = await fetch(`${API}/pulseras`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        usuario_id : usuario.id,
+                        perfil: {
+                            nombre,
+                            apellido         : document.getElementById('m-apellido').value.trim(),
+                            fecha_nacimiento : document.getElementById('m-fecha').value || null,
+                            tipo_portador    : document.getElementById('m-tipo').value,
+                            tipo_sangre      : document.getElementById('m-sangre').value || null,
+                            alergias         : document.getElementById('m-alergias').value.trim(),
+                            enfermedades     : document.getElementById('m-enfermedades').value.trim(),
+                            medicamentos     : document.getElementById('m-medicamentos').value.trim(),
+                            direccion        : document.getElementById('m-direccion').value.trim(),
+                        },
+                        contactos: [{ nombre: cNombre, parentesco: document.getElementById('m-c-parentesco').value.trim(), telefono: cTelefono }]
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) { mostrarError(data.error || 'Error al crear la pulsera.'); return; }
+
+                overlay.classList.remove('open');
+                cargarPulseras();
+            } catch (err) {
+                mostrarError('No se pudo conectar con el servidor.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar pulsera';
+            }
+        });
+
+        function mostrarError(msg) {
+            errEl.textContent = msg;
+            errEl.style.display = 'block';
+        }
+
+        cargarPulseras();
+    </script>
+</body>
+</html>

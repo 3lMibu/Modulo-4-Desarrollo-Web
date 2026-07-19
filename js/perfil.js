@@ -4,27 +4,42 @@
 // No requiere sesión activa.
 // ================================================================
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
 
-    // 1. Leer el token UUID de la URL (?id=XXXX)
+    // 1. Leer el token UUID de la URL (?token=XXXX o ?id=XXXX por compatibilidad)
     const params = new URLSearchParams(window.location.search);
-    const token  = params.get('id');
+    const token  = params.get('token') || params.get('id');
 
     if (!token) {
         mostrarError();
         return;
     }
 
-    // 2. Buscar el perfil en localStorage
-    const perfil = obtenerPerfil(token);
+    try {
+        const resp = await fetch(window.location.origin + '/api/publico/' + token);
+        if (!resp.ok) { mostrarError(); return; }
 
-    if (!perfil) {
+        const data = await resp.json();
+        if (!data.perfil) { mostrarError(); return; }
+
+        // Adaptar nombres de campo del backend (snake_case) al formato que espera poblarPerfil
+        const perfil = {
+            nombre          : data.perfil.nombre,
+            apellido        : data.perfil.apellido,
+            tipoSangre      : data.perfil.tipo_sangre,
+            fechaNacimiento : data.perfil.fecha_nacimiento,
+            alergias        : data.perfil.alergias,
+            enfermedades    : data.perfil.enfermedades,
+            medicamentos    : data.perfil.medicamentos,
+            direccion       : data.perfil.direccion,
+            contactos       : data.contactos || []
+        };
+
+        poblarPerfil(perfil);
+
+    } catch (err) {
         mostrarError();
-        return;
     }
-
-    // 3. Perfil encontrado: poblar la página
-    poblarPerfil(perfil);
 });
 
 // ----------------------------------------------------------------
